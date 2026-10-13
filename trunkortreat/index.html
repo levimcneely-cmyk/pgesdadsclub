@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trunk or Treat · PGES Dads Club</title>
+<meta name="description" content="Pleasant Grove Elementary Dads Club Trunk or Treat — see every trunk and vote for your favorites.">
+<meta name="theme-color" content="#140d1f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #140d1f;
+    --bg-2: #1f1530;
+    --card: #261a3a;
+    --line: #3a2a55;
+    --text: #f4eefc;
+    --muted: #b6a8cc;
+    --orange: #ff7a1a;
+    --orange-2: #ffb15c;
+    --green: #8be36b;
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: radial-gradient(1200px 600px at 50% -200px, #3b1f5c 0%, var(--bg) 60%) fixed, var(--bg);
+    color: var(--text);
+    font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+
+  header { text-align: center; padding: 36px 0 20px; }
+  .club { text-transform: uppercase; letter-spacing: .18em; font-size: 12px; font-weight: 900; color: var(--orange-2); }
+  h1 {
+    font-family: 'Creepster', cursive; font-weight: 400;
+    font-size: clamp(46px, 14vw, 78px); line-height: .95; margin: 10px 0 12px;
+    color: var(--orange);
+    text-shadow: 0 0 24px rgba(255,122,26,.35);
+  }
+  .meta { color: var(--muted); font-weight: 700; }
+  .meta span { display: block; }
+  .note { margin-top: 10px; color: var(--orange-2); font-weight: 700; }
+
+  nav.tabs {
+    position: sticky; top: 0; z-index: 5;
+    display: flex; gap: 8px; padding: 10px 0;
+    background: linear-gradient(var(--bg) 70%, transparent);
+  }
+  nav.tabs button {
+    flex: 1; appearance: none; border: 1px solid var(--line); background: var(--bg-2);
+    color: var(--muted); font: inherit; font-weight: 900; padding: 11px 8px; border-radius: 999px; cursor: pointer;
+  }
+  nav.tabs button[aria-selected="true"] { background: var(--orange); border-color: var(--orange); color: #1a0f05; }
+  nav.tabs button[hidden] { display: none; }
+
+  section[hidden] { display: none; }
+  h2 { font-size: 20px; margin: 18px 0 10px; }
+  .sub { color: var(--muted); margin: -4px 0 14px; font-size: 15px; }
+
+  .search {
+    width: 100%; font: inherit; color: var(--text); background: var(--bg-2);
+    border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px;
+  }
+  .search::placeholder { color: var(--muted); }
+
+  .trunk {
+    display: flex; gap: 14px; align-items: flex-start;
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 14px; margin-bottom: 10px;
+  }
+  .num {
+    flex: 0 0 auto; width: 44px; height: 44px; border-radius: 12px;
+    display: grid; place-items: center; font-weight: 900; font-size: 18px;
+    background: var(--orange); color: #1a0f05;
+  }
+  .trunk h3 { margin: 0 0 2px; font-size: 17px; }
+  .trunk .theme { color: var(--orange-2); font-weight: 700; font-size: 15px; }
+  .trunk .sponsor { color: var(--muted); font-size: 14px; margin-top: 4px; }
+  .badge {
+    display: inline-block; vertical-align: 2px; margin-left: 6px;
+    font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 999px; background: #3b2a5c; color: var(--orange-2);
+  }
+  .cat p .badge { margin-left: 0; margin-right: 6px; }
+
+  .cat {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 16px; margin-bottom: 12px;
+  }
+  .cat h3 { margin: 0; font-size: 18px; }
+  .cat p { margin: 2px 0 12px; color: var(--muted); font-size: 14px; }
+  .cat select {
+    width: 100%; font: inherit; font-weight: 700; color: var(--text); background: var(--bg-2);
+    border: 1px solid var(--line); border-radius: 12px; padding: 13px 12px;
+    -webkit-appearance: none; appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, var(--orange) 50%), linear-gradient(135deg, var(--orange) 50%, transparent 50%);
+    background-position: calc(100% - 20px) 55%, calc(100% - 14px) 55%;
+    background-size: 6px 6px; background-repeat: no-repeat;
+  }
+  .cat.done { opacity: .75; }
+  .cat .voted { color: var(--green); font-weight: 900; }
+
+  .btn {
+    display: block; width: 100%; appearance: none; border: 0; cursor: pointer;
+    font: inherit; font-weight: 900; font-size: 18px; padding: 16px; border-radius: 14px;
+    background: var(--orange); color: #1a0f05; margin: 6px 0 24px;
+  }
+  .btn:disabled { opacity: .45; cursor: default; }
+
+  .banner {
+    border: 1px dashed var(--line); border-radius: var(--radius); padding: 18px; text-align: center;
+    color: var(--muted); background: rgba(255,255,255,.02); margin: 8px 0 16px;
+  }
+  .banner strong { color: var(--text); display: block; font-size: 18px; margin-bottom: 4px; }
+
+  .result { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+  .result h3 { margin: 0 0 10px; font-size: 18px; color: var(--orange-2); }
+  .place { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line); }
+  .place:first-of-type { border-top: 0; }
+  .medal { font-size: 22px; width: 28px; text-align: center; }
+  .place .who { flex: 1; min-width: 0; }
+  .place .who b { display: block; }
+  .place .who small { color: var(--muted); }
+  .place .ct { font-weight: 900; color: var(--muted); white-space: nowrap; }
+  .place.first .who b { font-size: 18px; }
+
+  .toast {
+    position: fixed; left: 16px; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom));
+    max-width: 608px; margin: 0 auto; padding: 14px 16px; border-radius: 14px;
+    background: var(--green); color: #0c1a07; font-weight: 900; text-align: center;
+    transform: translateY(calc(100% + 48px)); visibility: hidden;
+    transition: transform .25s ease, visibility .25s; z-index: 10;
+  }
+  .toast.err { background: #ff6b6b; color: #2a0505; }
+  .toast.show { transform: translateY(0); visibility: visible; }
+
+  .loading { text-align: center; color: var(--muted); padding: 40px 0; }
+  footer { text-align: center; color: var(--muted); font-size: 13px; padding: 24px 0 36px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="club">Pleasant Grove Elementary · Dads Club</div>
+    <h1>Trunk or Treat</h1>
+    <div class="meta" id="meta"></div>
+    <div class="note" id="note" hidden></div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="trunks" aria-selected="true">Trunks</button>
+    <button role="tab" data-tab="vote" aria-selected="false">Vote</button>
+    <button role="tab" data-tab="results" aria-selected="false" hidden>Winners</button>
+  </nav>
+
+  <main id="app"><div class="loading">Summoning the trunks…</div></main>
+
+  <footer>Hosted by the Pleasant Grove Elementary Dads Club · Greenwood, IN</footer>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+// Paste the Apps Script web-app /exec URL here after deploying.
+const API_URL = 'https://script.google.com/macros/s/AKfycbxf8KjRit3pDxcugcqQ_KvArs6S-Ye3Fq9K-zzbr-LgRdgGU9diHvA6jmUcVIuFKApd/exec';
+const REFRESH_MS = 30000;
+
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+};
+let memVotes = {};
+function getDeviceId() {
+  let id = store.get('tot_device');
+  if (!id) {
+    id = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+    store.set('tot_device', id);
+  }
+  return id;
+}
+function getMyVotes() {
+  try { return JSON.parse(store.get('tot_votes') || 'null') || memVotes; } catch (e) { return memVotes; }
+}
+function saveMyVotes(v) { memVotes = v; store.set('tot_votes', JSON.stringify(v)); }
+
+let data = null;
+let tab = 'trunks';
+let filter = '';
+let draft = {};
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function toast(msg, isErr) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isErr ? ' err' : '');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => (t.className = 'toast'), 3200);
+}
+
+async function load() {
+  try {
+    const res = await fetch(API_URL, { cache: 'no-store' });
+    const json = await res.json();
+    if (!json.ok) throw new Error('bad payload');
+    data = json;
+    // Default to Winners once results are revealed
+    if (data.showResults && !load._revealed) { tab = 'results'; load._revealed = true; }
+    if (!data.showResults && tab === 'results') tab = 'trunks';
+    // Don't yank the page out from under someone mid-typing or mid-pick
+    const a = document.activeElement;
+    if (a && (a.id === 'search' || a.matches('select'))) return;
+    render();
+  } catch (e) {
+    if (!data) $('#app').innerHTML = '<div class="banner"><strong>Can’t reach the trunks right now.</strong>Check your signal and refresh.</div>';
+  }
+}
+
+function renderHeader() {
+  const ev = data.event || {};
+  $('#meta').innerHTML = [ev.date, ev.location].filter(x => x && x !== 'TBD').map(x => `<span>${esc(x)}</span>`).join('');
+  const note = $('#note');
+  note.hidden = !ev.note;
+  note.textContent = ev.note || '';
+  document.querySelectorAll('nav.tabs button').forEach(b => {
+    if (b.dataset.tab === 'results') b.hidden = !data.showResults;
+    b.setAttribute('aria-selected', String(b.dataset.tab === tab));
+  });
+}
+
+function trunkCard(t) {
+  return `<div class="trunk">
+    <div class="num">${t.number}</div>
+    <div>
+      <h3>${esc(t.name)}${t.staff ? '<span class="badge">Staff</span>' : ''}</h3>
+      ${t.theme ? `<div class="theme">${esc(t.theme)}</div>` : ''}
+      ${t.sponsor ? `<div class="sponsor">Sponsored by ${esc(t.sponsor)}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function renderTrunks() {
+  const q = filter.trim().toLowerCase();
+  const list = data.trunks.filter(t =>
+    !q || [t.number, t.name, t.theme, t.sponsor].join(' ').toLowerCase().includes(q));
+  return `
+    <h2>${data.trunks.length} trunk${data.trunks.length === 1 ? '' : 's'} this year</h2>
+    <input class="search" id="search" type="search" placeholder="Search by name, theme, sponsor or #" value="${esc(filter)}">
+    ${list.length ? list.map(trunkCard).join('') : '<div class="banner">No trunks match that.</div>'}
+    ${data.votingOpen ? '<button class="btn" data-go="vote">Vote for your favorites →</button>' : ''}
+  `;
+}
+
+function renderVote() {
+  if (!data.votingOpen) {
+    return `<div class="banner"><strong>Voting isn’t open yet.</strong>Check back once the trunks are up — the link will work right here.</div>`;
+  }
+  const mine = getMyVotes();
+  const optsFor = c => data.trunks
+    .filter(t => !c.staffOnly || t.staff)
+    .map(t => `<option value="${t.number}">#${t.number} · ${esc(t.name)}</option>`).join('');
+  const remaining = data.categories.filter(c => !mine[c.name]);
+  const cats = data.categories.map(c => {
+    const voted = mine[c.name];
+    if (voted) {
+      const t = data.trunks.find(x => String(x.number) === String(voted));
+      return `<div class="cat done"><h3>${esc(c.name)}</h3><p>${esc(c.description)}</p>
+        <div class="voted">✓ You voted #${esc(voted)}${t ? ' · ' + esc(t.name) : ''}</div></div>`;
+    }
+    const opts = optsFor(c);
+    const tag = c.staffOnly ? '<span class="badge">Staff trunks</span>' : '';
+    if (!opts) {
+      return `<div class="cat done"><h3>${esc(c.name)}</h3><p>${tag}${esc(c.description)}</p>
+        <div class="sub">No staff trunks listed yet.</div></div>`;
+    }
+    return `<div class="cat"><h3>${esc(c.name)}</h3><p>${tag}${esc(c.description)}</p>
+      <select data-cat="${esc(c.name)}"><option value="">Pick a trunk…</option>${opts}</select></div>`;
+  }).join('');
+  return `
+    <h2>Cast your votes</h2>
+    <p class="sub">One vote per category. Skip any you want.</p>
+    ${cats}
+    ${remaining.length ? '<button class="btn" id="submit" disabled>Submit votes</button>'
+      : '<div class="banner"><strong>All votes in. Thank you! 🎃</strong>Winners get announced at the end of the night.</div>'}
+  `;
+}
+
+function renderResults() {
+  const medals = ['🥇', '🥈', '🥉'];
+  return `<h2>And the winners are…</h2>` + data.results.map(r => `
+    <div class="result"><h3>${esc(r.category)}</h3>
+      ${r.leaders.length ? r.leaders.map((l, i) => `
+        <div class="place ${i === 0 ? 'first' : ''}">
+          <div class="medal">${medals[i]}</div>
+          <div class="who"><b>#${l.number} · ${esc(l.name)}</b>${l.sponsor ? `<small>${esc(l.sponsor)}</small>` : ''}</div>
+          <div class="ct">${l.votes} vote${l.votes === 1 ? '' : 's'}</div>
+        </div>`).join('') : '<div class="sub">No votes in this category.</div>'}
+    </div>`).join('');
+}
+
+function render() {
+  renderHeader();
+  const app = $('#app');
+  if (tab === 'trunks') app.innerHTML = renderTrunks();
+  else if (tab === 'vote') app.innerHTML = renderVote();
+  else app.innerHTML = renderResults();
+
+  // restore in-progress picks after a refresh
+  document.querySelectorAll('select[data-cat]').forEach(s => {
+    if (draft[s.dataset.cat]) s.value = draft[s.dataset.cat];
+  });
+  updateSubmit();
+}
+
+function updateSubmit() {
+  const btn = $('#submit');
+  if (btn) btn.disabled = !Object.values(draft).some(Boolean);
+}
+
+document.addEventListener('click', e => {
+  const tabBtn = e.target.closest('nav.tabs button');
+  const go = e.target.closest('[data-go]');
+  if (tabBtn || go) {
+    tab = (tabBtn || go).dataset.tab || go.dataset.go;
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  if (e.target.id === 'submit') submitVotes();
+});
+
+document.addEventListener('input', e => {
+  if (e.target.id === 'search') {
+    filter = e.target.value;
+    const pos = e.target.selectionStart;
+    render();
+    const s = $('#search'); s.focus(); s.setSelectionRange(pos, pos);
+  }
+});
+
+document.addEventListener('change', e => {
+  if (e.target.matches('select[data-cat]')) {
+    draft[e.target.dataset.cat] = e.target.value;
+    updateSubmit();
+  }
+});
+
+async function submitVotes() {
+  const votes = {};
+  Object.entries(draft).forEach(([k, v]) => { if (v) votes[k] = v; });
+  if (!Object.keys(votes).length) return;
+  const btn = $('#submit');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // avoids CORS preflight
+      body: JSON.stringify({ deviceId: getDeviceId(), votes }),
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || 'Something went wrong.');
+    const mine = getMyVotes();
+    [...json.recorded, ...json.skipped].forEach(c => { mine[c] = mine[c] || votes[c]; });
+    saveMyVotes(mine);
+    draft = {};
+    toast(json.recorded.length ? 'Votes counted — thanks! 🎃' : 'Looks like you already voted in those.');
+    render();
+  } catch (err) {
+    toast(err.message || 'Couldn’t send — try again.', true);
+    btn.disabled = false; btn.textContent = 'Submit votes';
+  }
+}
+
+// Deep link: /trunkortreat/#vote or ?vote opens the ballot (handy for the QR code)
+if (location.hash === '#vote' || new URLSearchParams(location.search).has('vote')) tab = 'vote';
+
+load();
+setInterval(load, REFRESH_MS);
+</script>
+</body>
+</html>
