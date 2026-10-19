@@ -6,6 +6,8 @@
 <title>Trunk or Treat · PGES Dads Club</title>
 <meta name="description" content="Pleasant Grove Elementary Dads Club Trunk or Treat — see every trunk and vote for your favorites.">
 <meta name="theme-color" content="#1c1730">
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik+Dirt&family=Kaushan+Script&family=Patrick+Hand+SC&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
@@ -70,6 +72,16 @@
   .meta span { display: block; }
   .meta span + span { font-family: 'Patrick Hand SC', cursive; font-size: 20px; color: var(--muted); margin-top: 4px; }
   .note { margin-top: 10px; color: var(--orange-2); font-family: 'Patrick Hand SC', cursive; font-size: 19px; }
+  body.compact header { padding: 14px 0 6px; }
+  body.compact .club, body.compact .meta, body.compact .note, body.compact .bat, body.compact .ghost { display: none; }
+  body.compact h1 { display: flex; align-items: baseline; justify-content: center; gap: 10px; margin: 0; }
+  body.compact h1 .t-trunk { font-size: clamp(34px, 11vw, 52px); }
+  body.compact h1 .t-or { font-size: clamp(18px, 5vw, 24px); margin: 0; }
+  body.compact h1 .t-treat { font-size: clamp(34px, 11vw, 52px); }
+  .cat .prize { display: inline-block; margin: 0 0 10px; font-weight: 900; font-size: 14px; color: #24130a;
+    background: var(--orange-2); padding: 3px 10px; border-radius: 999px; }
+  .cat h3 .ico, .result h3 .ico { margin-right: 6px; }
+  .result .prize { color: var(--muted); font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700; margin-left: 6px; }
   .bat { position: absolute; fill: #120e1f; opacity: .9; pointer-events: none; }
   .bat.b1 { width: 38px; top: 26px; left: 6px; transform: rotate(-12deg); }
   .bat.b2 { width: 32px; top: 182px; right: 18px; transform: rotate(10deg); }
@@ -231,6 +243,8 @@ function saveMyVotes(v) { memVotes = v; store.set('tot_votes', JSON.stringify(v)
 
 let data = null;
 let tab = 'trunks';
+let userPickedTab = false;
+const CACHE_KEY = 'tot_cache_v2';
 let filter = '';
 let draft = {};
 
@@ -251,9 +265,12 @@ async function load() {
     const json = await res.json();
     if (!json.ok) throw new Error('bad payload');
     data = json;
+    store.set(CACHE_KEY, JSON.stringify(json));
     // Default to Winners once results are revealed
     if (data.showResults && !load._revealed) { tab = 'results'; load._revealed = true; }
     if (!data.showResults && tab === 'results') tab = 'trunks';
+    if (!data.votingOpen && tab === 'vote' && !userPickedTab) tab = 'trunks';
+    pickDefaultTab();
     // Don't yank the page out from under someone mid-typing or mid-pick
     const a = document.activeElement;
     if (a && (a.id === 'search' || a.matches('select'))) return;
@@ -261,6 +278,12 @@ async function load() {
   } catch (e) {
     if (!data) $('#app').innerHTML = '<div class="banner"><strong>Can’t reach the trunks right now.</strong>Check your signal and refresh.</div>';
   }
+}
+
+// Land on the ballot whenever voting is open (unless they've tapped a tab themselves)
+function pickDefaultTab() {
+  if (userPickedTab || !data) return;
+  if (data.votingOpen && !data.showResults && tab === 'trunks') tab = 'vote';
 }
 
 function renderHeader() {
@@ -271,6 +294,7 @@ function renderHeader() {
   note.textContent = ev.note || '';
   document.querySelectorAll('nav.tabs button').forEach(b => {
     if (b.dataset.tab === 'results') b.hidden = !data.showResults;
+    if (b.dataset.tab === 'vote') b.textContent = data.votingOpen ? 'Vote 🗳️' : 'Vote';
     b.setAttribute('aria-selected', String(b.dataset.tab === tab));
   });
 }
@@ -305,22 +329,24 @@ function renderVote() {
   const mine = getMyVotes();
   const optsFor = c => data.trunks
     .filter(t => !c.staffOnly || t.staff)
-    .map(t => `<option value="${t.number}">#${t.number} · ${esc(t.name)}</option>`).join('');
+    .map(t => `<option value="${t.number}">#${t.number} · ${esc(t.name)}${t.theme ? ' — ' + esc(t.theme) : ''}</option>`).join('');
+  const head = c => `<h3>${c.icon ? `<span class="ico">${esc(c.icon)}</span>` : ''}${esc(c.name)}</h3>
+    ${c.prize ? `<div class="prize">${esc(c.prize)}</div>` : ''}`;
   const remaining = data.categories.filter(c => !mine[c.name]);
   const cats = data.categories.map(c => {
     const voted = mine[c.name];
     if (voted) {
       const t = data.trunks.find(x => String(x.number) === String(voted));
-      return `<div class="cat done"><h3>${esc(c.name)}</h3><p>${esc(c.description)}</p>
+      return `<div class="cat done">${head(c)}<p>${esc(c.description)}</p>
         <div class="voted">✓ You voted #${esc(voted)}${t ? ' · ' + esc(t.name) : ''}</div></div>`;
     }
     const opts = optsFor(c);
     const tag = c.staffOnly ? '<span class="badge">Staff trunks</span>' : '';
     if (!opts) {
-      return `<div class="cat done"><h3>${esc(c.name)}</h3><p>${tag}${esc(c.description)}</p>
+      return `<div class="cat done">${head(c)}<p>${tag}${esc(c.description)}</p>
         <div class="sub">No staff trunks listed yet.</div></div>`;
     }
-    return `<div class="cat"><h3>${esc(c.name)}</h3><p>${tag}${esc(c.description)}</p>
+    return `<div class="cat">${head(c)}<p>${tag}${esc(c.description)}</p>
       <select data-cat="${esc(c.name)}"><option value="">Pick a trunk…</option>${opts}</select></div>`;
   }).join('');
   return `
@@ -335,7 +361,7 @@ function renderVote() {
 function renderResults() {
   const medals = ['🥇', '🥈', '🥉'];
   return `<h2>And the winners are…</h2>` + data.results.map(r => `
-    <div class="result"><h3>${esc(r.category)}</h3>
+    <div class="result"><h3>${r.icon ? `<span class="ico">${esc(r.icon)}</span>` : ''}${esc(r.category)}${r.prize ? `<span class="prize">${esc(r.prize)}</span>` : ''}</h3>
       ${r.leaders.length ? r.leaders.map((l, i) => `
         <div class="place ${i === 0 ? 'first' : ''}">
           <div class="medal">${medals[i]}</div>
@@ -346,6 +372,7 @@ function renderResults() {
 }
 
 function render() {
+  document.body.classList.toggle('compact', tab === 'vote');
   renderHeader();
   const app = $('#app');
   if (tab === 'trunks') app.innerHTML = renderTrunks();
@@ -369,6 +396,7 @@ document.addEventListener('click', e => {
   const go = e.target.closest('[data-go]');
   if (tabBtn || go) {
     tab = (tabBtn || go).dataset.tab || go.dataset.go;
+    userPickedTab = true;
     render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -418,7 +446,13 @@ async function submitVotes() {
 }
 
 // Deep link: /trunkortreat/#vote or ?vote opens the ballot (handy for the QR code)
-if (location.hash === '#vote' || new URLSearchParams(location.search).has('vote')) tab = 'vote';
+if (location.hash === '#vote' || new URLSearchParams(location.search).has('vote')) { tab = 'vote'; userPickedTab = true; }
+
+// Paint the last-known trunks/ballot instantly (repeat visits), then refresh from the Sheet.
+try {
+  const cached = JSON.parse(store.get(CACHE_KEY) || 'null');
+  if (cached && cached.ok) { data = cached; pickDefaultTab(); if (data.showResults) { tab = 'results'; load._revealed = true; } render(); }
+} catch (e) {}
 
 load();
 setInterval(load, REFRESH_MS);
